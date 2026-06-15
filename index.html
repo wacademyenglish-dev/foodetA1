@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WOLF LABS | The VIP Dinner (A1)</title>
+    
+    <!-- Fonts: Playfair Display (Luxury), Inter (Clean UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgBase: '#0A0505',       /* Deep Onyx/Burgundy tint */
+                        panelDark: '#140A0A',    /* Dark Burgundy */
+                        panelHover: '#241111',   /* Lighter Burgundy */
+                        textMain: '#FDFCF0',     /* Pearl White */
+                        textMuted: '#888888',    /* Silver */
+                        accentGold: '#D4AF37',   /* Michelin Gold */
+                        accentRed: '#8B0000',    /* Wine Red */
+                        accentGreen: '#10B981'   /* Success Green */
+                    },
+                    fontFamily: {
+                        epic: ['"Playfair Display"', 'serif'],
+                        ui: ['"Inter"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background-color: #0A0505; color: #FDFCF0; overflow: hidden; font-family: 'Inter', sans-serif; 
+            transition: background-color 1s ease; 
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(139, 0, 0, 0.1) 0%, transparent 40%);
+        }
+        
+        .ws-panel { background: #140A0A; border: 1px solid #331A1A; box-shadow: 0 20px 40px rgba(0,0,0,0.9); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #331A1A; border-radius: 10px; }
+
+        @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+        .fade-out { animation: fadeOut 0.8s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes damageShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
+        .damage-shake { animation: damageShake 0.4s ease-in-out; }
+        @keyframes slideDown { 0% { transform: translateY(-100%); opacity: 0; } 10%, 90% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100%); opacity: 0; } }
+        .praise-slide { animation: slideDown 3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        .teacher-drawer { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: #0A0505; z-index: 200; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid #D4AF37; box-shadow: -10px 0 40px rgba(0,0,0,0.9); }
+        .teacher-drawer.open { right: 0; }
+
+        .progress-bar-fill { transition: width 0.3s ease; }
+        .glow-gold { text-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+
+        .btn-luxury { background: transparent; color: #D4AF37; border: 1px solid #D4AF37; font-family: 'Playfair Display', serif; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 0.15em; font-weight: 700; transition: all 0.3s ease; cursor: pointer; box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.05); }
+        .btn-luxury:hover { background: #D4AF37; color: #0A0505; box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); }
+        
+        /* Politeness Filter Mechanic */
+        .rude-text { color: #888; text-decoration: line-through; text-decoration-color: #8B0000; cursor: pointer; transition: all 0.3s; position: relative; padding: 4px 8px; border: 1px solid #331A1A; border-radius: 4px; background: #0A0505;}
+        .rude-text:hover { background: rgba(139, 0, 0, 0.2); border-color: #8B0000; color: #FDFCF0;}
+        .rude-text.polite { color: #D4AF37; text-decoration: none; border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); pointer-events: none; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);}
+
+        .vocab-link { color: #D4AF37; font-weight: bold; border-bottom: 1px dashed #D4AF37; cursor: pointer; transition: all 0.2s; }
+        .vocab-link:hover { background: rgba(212, 175, 55, 0.1); }
+        .vocab-link.active { background: #D4AF37; color: #0A0505; }
+    </style>
+</head>
+<body class="flex flex-col h-screen select-none relative">
+    
+    <div id="loading-screen" class="fixed inset-0 z-[1000] bg-bgBase flex flex-col items-center justify-center">
+        <div class="text-accentGold text-6xl mb-6 animate-pulse glow-gold"><i class="fa-solid fa-wine-glass-empty"></i></div>
+        <h1 class="font-epic text-5xl md:text-7xl text-textMain tracking-[0.2em] mb-4 uppercase">THE VIP DINNER</h1>
+        <p class="font-ui text-accentGold tracking-widest mb-12 font-bold uppercase text-sm border-b border-accentGold pb-2">Michelin Star Experience (A1)</p>
+        <button onclick="initializeSystem()" class="btn-luxury px-16 py-4 rounded">BOOK TABLE</button>
+    </div>
+
+    <div id="damage-overlay" class="fixed inset-0 z-[800] bg-accentRed/10 border-[12px] border-accentRed/30 opacity-0 pointer-events-none transition-opacity duration-100 flex items-center justify-center">
+        <i class="fa-solid fa-bell-concierge text-9xl text-accentRed opacity-20"></i>
+    </div>
+
+    <div id="praise-overlay" class="fixed top-0 left-0 w-full z-[900] flex justify-center pointer-events-none transform -translate-y-full">
+        <div id="praise-card" class="mt-8 bg-accentGold text-bgBase px-20 py-6 rounded-b-2xl shadow-[0_20px_50px_rgba(212,175,55,0.4)] border-b-4 border-[#FFF] text-center">
+            <h2 id="praise-text" class="font-epic text-4xl md:text-5xl font-black uppercase tracking-widest mb-1">EXCELLENT!</h2>
+            <p id="praise-sub" class="font-ui text-sm font-bold tracking-[0.3em] uppercase">Service Approved</p>
+        </div>
+    </div>
+
+    <div id="teacher-panel" class="teacher-drawer p-8 flex flex-col">
+        <div class="flex justify-between items-center mb-8 border-b border-[#331A1A] pb-4">
+            <h2 class="font-epic text-3xl text-accentGold tracking-widest uppercase"><i class="fa-solid fa-user-tie mr-3"></i> The Maitre D'</h2>
+            <button onclick="toggleTeacherPanel()" class="text-textMuted hover:text-accentGold transition-colors"><i class="fa-solid fa-xmark text-3xl"></i></button>
+        </div>
+        <textarea id="teacher-notes" class="flex-1 bg-[#140A0A] border border-[#331A1A] p-5 font-epic text-xl text-textMain focus:outline-none focus:border-accentGold resize-none mb-8 rounded shadow-inner" placeholder="> Take notes on the guest's pronunciation and etiquette..."></textarea>
+        <div class="space-y-4">
+            <p class="font-ui text-xs text-textMuted tracking-[0.3em] uppercase text-center font-bold">Service Rating</p>
+            <button onclick="triggerPraise('POLITE!', 'Perfect Grammar')" class="w-full py-4 bg-transparent border border-accentGreen text-accentGreen hover:bg-accentGreen hover:text-bgBase transition-all font-epic tracking-widest uppercase rounded text-lg">Award Grammar</button>
+            <button onclick="triggerPraise('ELEGANT!', 'Perfect Vocab')" class="w-full py-4 bg-transparent border border-accentGold text-accentGold hover:bg-accentGold hover:text-bgBase transition-all font-epic tracking-widest uppercase rounded text-lg">Award Vocab</button>
+        </div>
+    </div>
+
+    <header class="h-24 bg-[#0A0505] border-b border-[#331A1A] z-100 flex items-center justify-between px-8 shrink-0 relative z-40">
+        <div class="flex items-center gap-8">
+            <div id="health-bar" class="flex gap-3 text-xl text-accentRed drop-shadow-md">
+                <i class="fa-solid fa-star" id="hp-1"></i><i class="fa-solid fa-star" id="hp-2"></i><i class="fa-solid fa-star" id="hp-3"></i>
+            </div>
+            <div class="flex flex-col border-l border-[#331A1A] pl-6">
+                <span class="font-ui text-[9px] text-textMuted uppercase tracking-[0.3em] font-bold">Etiquette Points</span>
+                <span id="xp-counter" class="font-epic text-2xl text-accentGold tracking-widest leading-none glow-gold">0000</span>
+            </div>
+        </div>
+        <div class="absolute left-1/2 -translate-x-1/2 text-center bg-[#140A0A] px-12 py-3 border border-[#331A1A] rounded-b-xl border-t-0 shadow-lg">
+            <p id="hud-name" class="font-epic text-2xl text-textMain tracking-[0.2em] uppercase">GUEST</p>
+            <p class="font-ui text-[9px] text-accentGold tracking-[0.2em] uppercase mt-1 font-bold">Table 1 (VIP)</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="toggleFullScreen()" class="w-12 h-12 border border-[#331A1A] bg-[#140A0A] flex items-center justify-center rounded text-textMuted hover:border-accentGold hover:text-accentGold transition-colors"><i class="fa-solid fa-expand text-lg" id="fs-icon"></i></button>
+            <button onclick="toggleTeacherPanel()" class="font-ui text-xs font-bold text-bgBase bg-accentGold tracking-widest uppercase px-6 py-3 rounded hover:shadow-[0_0_15px_rgba(212,175,55,0.5)] transition-all"><i class="fa-solid fa-concierge-bell mr-2"></i> Maitre D'</button>
+        </div>
+    </header>
+
+    <main id="arena" class="flex-1 relative overflow-y-auto overflow-x-hidden flex items-center justify-center p-4 md:p-8">
+        <div id="step-container" class="w-full max-w-5xl transition-all duration-300 relative z-10 h-full flex flex-col justify-center pb-20"></div>
+    </main>
+
+    <footer class="h-20 bg-[#0A0505] border-t border-[#331A1A] z-100 flex items-center justify-between px-8 shrink-0 relative z-40">
+        <div class="w-1/3">
+            <div class="w-full bg-[#140A0A] h-1.5 rounded-full overflow-hidden border border-[#331A1A]">
+                <div id="progress-fill" class="h-full bg-accentGold transition-all duration-500 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 4%"></div>
+            </div>
+        </div>
+        <div class="w-1/3 text-center">
+            <span id="page-counter" class="font-ui font-bold text-textMuted text-xs tracking-[0.4em] uppercase">COURSE 01 / 20</span>
+        </div>
+        <div class="w-1/3 flex justify-end gap-6">
+            <button id="btn-prev" onclick="nav(-1)" class="w-10 h-10 flex items-center justify-center text-textMuted border border-[#331A1A] rounded hover:border-accentGold hover:text-accentGold disabled:opacity-20 transition-all"><i class="fa-solid fa-chevron-left text-sm"></i></button>
+            <button id="btn-next" onclick="nav(1)" class="w-10 h-10 flex items-center justify-center text-bgBase bg-accentGold rounded hover:scale-110 shadow-[0_0_15px_rgba(212,175,55,0.4)] disabled:opacity-20 transition-all"><i class="fa-solid fa-chevron-right text-sm"></i></button>
+        </div>
+    </footer>
+
+    <script>
+        // --- STREAMING_CHUNK:State & Helpers ---
+        let state = { step: 0, hp: 3, xp: 0, studentName: "GUEST", activeQuestions: {} };
+
+        function initializeSystem() { 
+            const loading = document.getElementById('loading-screen');
+            if(loading) loading.classList.add('fade-out'); 
+            render(); 
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+                document.getElementById('fs-icon').classList.replace('fa-expand', 'fa-compress');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fs-icon').classList.replace('fa-compress', 'fa-expand');
+                }
+            }
+        }
+
+        function updateHUD() {
+            for(let i=1; i<=3; i++) {
+                const heart = document.getElementById(`hp-${i}`);
+                if(heart) heart.style.opacity = (i <= state.hp) ? "1" : "0.2";
+            }
+            const nameEl = document.getElementById('hud-name');
+            if(nameEl) nameEl.innerText = state.studentName;
+            
+            const xpEl = document.getElementById('xp-counter');
+            if(xpEl) xpEl.innerText = String(state.xp).padStart(4, '0');
+            
+            const total = lesson.length;
+            const pageEl = document.getElementById('page-counter');
+            if(pageEl) pageEl.innerText = `COURSE ${String(state.step + 1).padStart(2, '0')} / ${total}`;
+            
+            const progEl = document.getElementById('progress-fill');
+            if(progEl) progEl.style.width = `${((state.step + 1) / total) * 100}%`;
+            
+            const btnPrev = document.getElementById('btn-prev');
+            if(btnPrev) btnPrev.disabled = state.step === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            if(btnNext) btnNext.disabled = state.step === total - 1;
+        }
+
+        function nav(dir) { 
+            let n = state.step + dir; 
+            if(n >= 0 && n < lesson.length) { 
+                state.step = n; 
+                render(); 
+            } 
+        }
+
+        function takeDamage() {
+            if(state.hp > 0) state.hp--;
+            const overlay = document.getElementById('damage-overlay');
+            if(overlay) overlay.classList.replace('opacity-0', 'opacity-100');
+            const arena = document.getElementById('arena');
+            if(arena) arena.classList.add('damage-shake');
+            updateHUD();
+            setTimeout(() => { 
+                if(overlay) overlay.classList.replace('opacity-100', 'opacity-0'); 
+                if(arena) arena.classList.remove('damage-shake'); 
+            }, 400);
+        }
+
+        function triggerPraise(mainText = 'EXCELLENT!', subText = 'SERVICE APPROVED') {
+            const overlay = document.getElementById('praise-overlay');
+            const card = document.getElementById('praise-card');
+            const pText = document.getElementById('praise-text');
+            const pSub = document.getElementById('praise-sub');
+            
+            if(pText) pText.innerText = mainText; 
+            if(pSub) pSub.innerText = subText;
+            
+            state.xp += 100; 
+            updateHUD();
+            
+            if(overlay) overlay.classList.remove('opacity-0', 'pointer-events-none');
+            if(card) {
+                card.classList.remove('praise-slide'); 
+                void card.offsetWidth; 
+                card.classList.add('praise-slide');
+            }
+            
+            shootConfetti();
+        }
+
+        function toggleTeacherPanel() { 
+            const panel = document.getElementById('teacher-panel');
+            if(panel) panel.classList.toggle('open'); 
+        }
+
+        const buildSpeakingPrompt = (q, starter) => {
+            if(!q) return '';
+            return `
+                <div class="mt-10 fade-in w-full max-w-2xl mx-auto bg-[#140A0A] border border-[#331A1A] border-l-4 border-l-accentGold p-8 rounded shadow-2xl relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-8xl text-bgBase opacity-50"><i class="fa-solid fa-wine-glass"></i></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-accentGold font-ui font-bold text-[10px] tracking-[0.3em] uppercase bg-accentGold/10 px-3 py-1 rounded">Conversation</span>
+                    </div>
+                    <p class="font-epic text-3xl text-textMain mb-4 relative z-10 leading-snug">"${q}"</p>
+                    <p class="font-ui text-textMuted text-sm font-bold tracking-widest relative z-10 italic">"${starter}"</p>
+                </div>`;
+        };
+
+        // --- STREAMING_CHUNK:Lesson Data ---
+        const lesson = [
+            /* 00 */ { type: 'cover', title: 'THE VIP DINNER', subtitle: 'Fine Dining Protocol', desc: 'A1 Level. Master restaurant vocabulary and polite requests (I would like, Can I have).', icon: 'fa-utensils' },
+            /* 01 */ { type: 'idReg', title: 'THE GUEST LIST', desc: 'Enter your surname to confirm your reservation.' },
+            
+            /* 02 */ { type: 'tableSelect', title: 'TABLE SELECTION', instruction: 'Where would you like to sit tonight?', 
+                       options: [
+                           { id: 'window', label: 'The Window Table', desc: 'A beautiful view of the city.', icon: 'fa-city' },
+                           { id: 'booth', label: 'The Private Booth', desc: 'Quiet and exclusive.', icon: 'fa-couch' },
+                           { id: 'chef', label: 'The Chef\'s Table', desc: 'Watch the cooking action.', icon: 'fa-fire-burner' }
+                       ], 
+                       followUpQ: 'Why did you choose this table?', starter: '"I chose this table because..."' },
+            
+            /* 03 */ { type: 'matchVocab', title: 'THE MENU STRUCTURE', pairs: [{w:'Starters', d:'Small food before the main meal (Soup, Salad).'}, {w:'Main Course', d:'The biggest part of the meal (Steak, Pasta).'}, {w:'Dessert', d:'Sweet food at the end of the meal (Cake, Ice cream).'}] },
+            
+            /* 04 */ { type: 'shift', title: 'ETIQUETTE WARNING', desc: 'In English, it is very rude to say "I want" or "Give me" in a restaurant. You must learn the polite forms.', bg: 'immersive-shift' },
+            
+            /* 05 */ { type: 'grammarCards', title: 'THE ETIQUETTE GUIDE 1', 
+                       badHeader: 'RUDE (Never say this)', badText: '"I WANT the chicken."',
+                       goodHeader: 'POLITE (Say this)', goodText: '"I WOULD LIKE the chicken, please."',
+                       rule: 'Use "I would like" (or "I\'d like") when ordering food. It is the polite version of "I want".' },
+
+            /* 06 */ { type: 'politenessFilter', title: 'ETIQUETTE CHECK 1', instruction: 'This client is very rude. Click the rude sentence to change it to the polite version.',
+                       rude: 'I want the steak and I want water.', polite: 'I would like the steak and I would like water, please.',
+                       followUpQ: 'What is your favorite Main Course in a restaurant?', starter: '"My favorite main course is..."' },
+
+            /* 07 */ { type: 'decoder', title: 'THE ORDER PAD 1', blocks: ['would', 'like', 'the', 'I', 'salmon', 'please'], correct: 'I would like the salmon please', followUpQ: 'Order your favorite drink from the waiter.', starter: '"I would like..."' },
+
+            /* 08 */ { type: 'easyReader', title: 'THE MICHELIN REVIEW', photoIcon: 'fa-star', 
+                       text: 'The food here is amazing. For the starter, I ordered the salad. For the main course, I asked for my steak <span class="vocab-link" onclick="openVocabModal(this, \'Well-done\', \'Cooked completely, no red meat inside.\', \'How do you like your steak?\', \'I like my steak...\')">well-done</span>. I drank <span class="vocab-link" onclick="openVocabModal(this, \'Sparkling Water\', \'Water with gas/bubbles.\', \'Do you prefer sparkling or still (normal) water?\', \'I prefer...\')">sparkling water</span>. At the end, I paid the bill and left a big <span class="vocab-link" onclick="openVocabModal(this, \'Tip\', \'Extra money for the waiter for good service.\', \'Do people leave tips in your country?\', \'Yes, they leave tips / No, they don\\\'t...\')">tip</span>.', 
+                       defaultFollowUp: 'Read the food review out loud to the Teacher.' },
+
+            /* 09 */ { type: 'grammarCards', title: 'THE ETIQUETTE GUIDE 2', 
+                       badHeader: 'RUDE (Never say this)', badText: '"GIVE ME the menu."',
+                       goodHeader: 'POLITE (Say this)', goodText: '"CAN I HAVE the menu, please?"',
+                       rule: 'When asking the waiter to bring you something (water, the bill, the menu), use "Can I have...?"' },
+
+            /* 10 */ { type: 'politenessFilter', title: 'ETIQUETTE CHECK 2', instruction: 'Click the rude sentence to transform it into the polite version.',
+                       rude: 'Give me the bill now.', polite: 'Can I have the bill, please?',
+                       followUpQ: 'Ask the waiter for some more bread.', starter: '"Excuse me, can I have..."' },
+
+            /* 11 */ { type: 'decoder', title: 'THE ORDER PAD 2', blocks: ['have', 'the', 'menu', 'Can', 'I', 'please?'], correct: 'Can I have the menu please?', followUpQ: 'Ask the waiter for the dessert menu.', starter: '"Can I have..."' },
+
+            /* 12 */ { type: 'qRoulette', title: 'DINNER CONVERSATION', instruction: 'Spin the wheel to chat. Questions disappear after you answer them!', 
+                       questions: ['What is your favorite restaurant in your city?', 'Do you prefer cooking at home or eating out?', 'What is your favorite dessert?', 'Do you like trying food from other countries?', 'What do you usually drink with your dinner?', 'Do you eat soup for a starter?'] },
+
+            /* 13 */ { type: 'crossroads', title: 'THE BILL DILEMMA', dilemma: 'The dinner is over. The client ordered a $5,000 bottle of wine without asking you. The bill is huge. Do you pay for everything to win the contract, or do you ask to split the bill?', opt1: 'Pay Everything', opt2: 'Split the Bill' },
+
+            /* 14 */ { type: 'debate', title: 'DEEP THOUGHT: TIPPING', q: 'In the USA, you must leave a 20% tip for the waiter. In some countries, tipping is not normal. What do you think about this rule?', starter: '"I think tipping is... because..."' },
+            /* 15 */ { type: 'homework', title: 'DINNER CONCLUDED', desc: 'The deal is closed. Download the Maitre D\' App to practice your polite requests.', appName: 'Maitre D\' App' },
+            /* 16 */ { type: 'curtain', title: '5-STAR GUEST', desc: 'You mastered Restaurant Vocabulary, "I would like", and "Can I have"!' }
+        ];
+
+        // --- STREAMING_CHUNK:Render Engine ---
+        function render() {
+            const container = document.getElementById('step-container');
+            const d = lesson[state.step];
+            container.innerHTML = ''; updateHUD();
+            let content = '';
+
+            switch(d.type) {
+                case 'cover':
+                    content = `
+                        <div class="text-center fade-in flex flex-col items-center">
+                            <i class="fa-solid ${d.icon} text-7xl text-accentGold mb-6 glow-gold"></i>
+                            <h1 class="font-epic text-6xl md:text-8xl text-textMain tracking-[0.2em] uppercase mb-4">${d.title}</h1>
+                            <h2 class="font-ui text-xl text-textMuted tracking-[0.4em] uppercase mb-10 font-bold border-b border-[#331A1A] pb-2">${d.subtitle}</h2>
+                            <p class="font-ui text-sm text-textMuted max-w-lg mx-auto ws-panel p-6 border-t-2 border-accentGold leading-relaxed">${d.desc}</p>
+                        </div>`;
+                    break;
+                case 'idReg':
+                    content = `
+                        <div class="text-center fade-in w-full max-w-xl mx-auto ws-panel p-16 border-l-4 border-accentGold">
+                            <i class="fa-solid fa-book-open-reader text-5xl text-accentGold mb-6"></i>
+                            <h2 class="font-epic text-4xl text-textMain mb-4 tracking-widest uppercase">${d.title}</h2>
+                            <p class="font-ui text-textMuted text-sm font-bold mb-10 uppercase tracking-widest">${d.desc}</p>
+                            <div class="relative mb-12">
+                                <input type="text" id="id-input" class="w-full bg-[#0A0505] border border-[#331A1A] p-5 text-center font-epic text-3xl text-accentGold focus:outline-none focus:border-accentGold transition-colors uppercase tracking-widest" placeholder="YOUR SURNAME">
+                            </div>
+                            <button onclick="registerID()" class="w-full btn-luxury py-5">CONFIRM RESERVATION</button>
+                        </div>`;
+                    break;
+                case 'tableSelect':
+                    content = `
+                        <div class="w-full max-w-5xl mx-auto fade-in flex flex-col items-center">
+                            <h2 class="font-epic text-4xl text-textMain mb-4 tracking-widest uppercase">${d.title}</h2>
+                            <p class="font-ui text-textMuted text-sm mb-10 font-bold uppercase tracking-widest">${d.instruction}</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-12">
+                                ${d.options.map(opt => `
+                                    <button onclick="selectTable(this, '${opt.id}')" class="table-card bg-panelDark border border-[#331A1A] p-8 text-center hover:border-accentGold transition-all relative overflow-hidden group flex flex-col cursor-pointer shadow-lg">
+                                        <div class="absolute top-0 left-0 w-full h-1 bg-accentGold opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <i class="fa-solid ${opt.icon} text-5xl text-textMuted group-hover:text-accentGold mb-6 transition-colors mx-auto"></i>
+                                        <h3 class="font-epic text-2xl text-textMain mb-3 tracking-widest">${opt.label}</h3>
+                                        <p class="font-ui text-sm text-textMuted leading-relaxed flex-1">${opt.desc}</p>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button id="confirm-table-btn" onclick="confirmTable()" class="btn-luxury px-16 py-4 opacity-50 pointer-events-none transition-all hidden">SIT DOWN</button>
+                            <div id="follow-up-box" class="hidden w-full max-w-3xl">${buildSpeakingPrompt(d.followUpQ, d.starter)}</div>
+                        </div>`;
+                    break;
+                case 'matchVocab':
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto fade-in">
+                            <h2 class="font-epic text-5xl text-textMain mb-12 text-center uppercase tracking-widest">${d.title}</h2>
+                            <div class="flex flex-col md:flex-row gap-8">
+                                <div class="w-full md:w-1/3 flex flex-col gap-4" id="vocab-bank">
+                                    ${[...d.pairs].sort(()=>Math.random()-0.5).map(p => `
+                                        <button onclick="selectVocab(this)" class="vocab-pill bg-panelDark border border-[#331A1A] p-5 font-epic text-2xl text-textMain hover:border-accentGold transition-colors shadow-md tracking-widest uppercase" data-word="${p.w}">${p.w}</button>
+                                    `).join('')}
+                                </div>
+                                <div class="w-full md:w-2/3 flex flex-col gap-4">
+                                    ${[...d.pairs].sort(()=>Math.random()-0.5).map((p, i) => `
+                                        <div class="bg-panelDark border border-[#331A1A] p-4 shadow-sm flex items-center gap-6">
+                                            <div class="vocab-drop w-48 h-16 border border-dashed border-[#555] flex items-center justify-center cursor-pointer bg-[#0A0505] transition-colors" onclick="dropVocab(this, '${p.w}')"></div>
+                                            <p class="font-ui text-sm text-textMuted flex-1 leading-relaxed">"${p.d}"</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+                    break;
+                case 'shift':
+                    content = `
+                        <div class="w-full text-center fade-in flex flex-col items-center justify-center h-full">
+                            <div class="bg-accentRed text-white px-6 py-1 font-ui font-bold text-xs animate-pulse mb-6 tracking-[0.3em] uppercase">WARNING</div>
+                            <h1 class="font-epic text-5xl md:text-7xl text-textMain mb-6 tracking-widest uppercase">${d.title}</h1>
+                            <div class="max-w-2xl mx-auto text-center ws-panel p-8 border border-accentRed mb-12">
+                                <p class="font-ui text-xl text-textMain leading-relaxed">${d.desc}</p>
+                            </div>
+                            <button onclick="nav(1)" class="btn-luxury px-16 py-4 border-accentRed text-accentRed hover:bg-accentRed hover:text-white">LEARN ETIQUETTE</button>
+                        </div>`;
+                    break;
+                case 'grammarCards':
+                    content = `
+                        <div class="w-full max-w-5xl mx-auto fade-in text-center flex flex-col items-center justify-center h-full">
+                            <h2 class="font-epic text-4xl text-textMain mb-12 tracking-widest uppercase">${d.title}</h2>
+                            
+                            <div class="flex flex-col md:flex-row gap-8 w-full mb-12">
+                                <div class="flex-1 ws-panel p-10 border-t-4 border-accentRed text-center shadow-2xl">
+                                    <i class="fa-solid fa-xmark text-4xl text-accentRed mb-4"></i>
+                                    <h3 class="font-ui text-xs text-textMuted tracking-[0.3em] uppercase mb-6 font-bold">${d.badHeader}</h3>
+                                    <p class="font-epic text-3xl text-textMain line-through decoration-accentRed decoration-2">"${d.badText}"</p>
+                                </div>
+                                <div class="flex-1 ws-panel p-10 border-t-4 border-accentGold text-center shadow-2xl bg-accentGold/5">
+                                    <i class="fa-solid fa-check text-4xl text-accentGold mb-4"></i>
+                                    <h3 class="font-ui text-xs text-accentGold tracking-[0.3em] uppercase mb-6 font-bold">${d.goodHeader}</h3>
+                                    <p class="font-epic text-3xl text-textMain">"${d.goodText}"</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#0A0505] border border-[#331A1A] p-6 max-w-3xl border-l-2 border-accentGold">
+                                <p class="font-ui text-lg text-textMain leading-relaxed"><i class="fa-solid fa-lightbulb text-accentGold mr-3"></i> ${d.rule}</p>
+                            </div>
+                            
+                            <button onclick="nav(1)" class="mt-10 btn-luxury px-16 py-4">I UNDERSTAND</button>
+                        </div>`;
+                    break;
+                case 'politenessFilter':
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto fade-in text-center flex flex-col items-center">
+                            <h2 class="font-epic text-4xl text-textMain mb-4 tracking-widest uppercase">${d.title}</h2>
+                            <p class="font-ui text-textMuted text-xs mb-10 font-bold uppercase tracking-[0.2em]">${d.instruction}</p>
+                            
+                            <div class="ws-panel w-full p-16 shadow-2xl mb-10 text-center flex flex-col items-center justify-center min-h-[200px] border border-[#331A1A]">
+                                <p class="font-epic text-4xl leading-relaxed rude-text" onclick="filterPoliteness(this, '${d.polite}')" id="filter-target">"${d.rude}"</p>
+                            </div>
+                            
+                            <button id="verify-filter-btn" onclick="nav(1)" class="btn-luxury px-16 py-4 opacity-50 pointer-events-none transition-all hidden">ETIQUETTE VERIFIED</button>
+                            <div id="decoder-followup" class="hidden w-full">${buildSpeakingPrompt(d.followUpQ, d.starter)}</div>
+                        </div>`;
+                    break;
+                case 'decoder':
+                    let shuffled = [...d.blocks].sort(()=>Math.random()-0.5);
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto fade-in text-center">
+                            <h2 class="font-epic text-4xl text-textMain mb-8 uppercase tracking-widest">${d.title}</h2>
+                            <div id="decoder-ans" class="min-h-[120px] bg-[#140A0A] border-2 border-dashed border-[#555] p-6 mb-10 flex flex-wrap gap-4 justify-center items-center shadow-inner relative">
+                                <div id="decoder-placeholder" class="absolute top-4 left-4 text-textMuted text-xs uppercase tracking-widest font-ui"><i class="fa-solid fa-pen-nib mr-2"></i> Write Order Here</div>
+                            </div>
+                            <div id="decoder-bank" class="flex flex-wrap gap-4 justify-center mb-12">
+                                ${shuffled.map(w => `<button onclick="moveBlock(this)" class="bg-[#0A0505] border border-[#331A1A] px-8 py-4 text-xl font-epic text-textMain hover:border-accentGold hover:text-accentGold transition-colors shadow-lg">${w}</button>`).join('')}
+                            </div>
+                            <button id="verify-btn" onclick="checkDecoder('${d.correct}')" class="btn-luxury px-16 py-4">CONFIRM ORDER</button>
+                            
+                            <div id="decoder-followup" class="hidden mt-6">
+                                ${buildSpeakingPrompt(d.followUpQ, d.starter)}
+                            </div>
+                        </div>`;
+                    break;
+                case 'easyReader':
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto fade-in flex flex-col md:flex-row gap-10 items-center md:items-start">
+                            <div class="ws-panel p-4 shrink-0 shadow-2xl text-center">
+                                <div class="w-56 h-72 bg-[#0A0505] flex items-center justify-center border border-[#331A1A] mb-4">
+                                    <i class="fa-solid ${d.photoIcon} text-7xl text-accentGold drop-shadow-md"></i>
+                                </div>
+                                <div class="flex justify-center gap-1 text-accentGold text-sm">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-1 w-full pt-4">
+                                <h2 class="font-epic text-4xl text-textMain mb-6 border-b border-[#331A1A] pb-4 uppercase tracking-widest">${d.title}</h2>
+                                <div class="bg-[#140A0A] p-8 border-l-4 border-accentGold shadow-lg relative">
+                                    <p class="text-2xl text-textMain font-epic leading-loose">${d.text}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="vocab-modal" class="hidden mt-12 fade-in max-w-2xl mx-auto ws-panel border border-accentGold p-8 shadow-2xl relative">
+                            <div class="absolute -right-4 -bottom-4 text-6xl text-bgBase opacity-40"><i class="fa-solid fa-book-open"></i></div>
+                            <div class="flex items-center gap-4 mb-4 border-b border-[#331A1A] pb-4">
+                                <i class="fa-solid fa-search text-2xl text-accentGold"></i>
+                                <div>
+                                    <h3 id="modal-title" class="font-epic text-2xl text-accentGold uppercase tracking-widest"></h3>
+                                    <p id="modal-def" class="font-ui text-sm text-textMain font-bold"></p>
+                                </div>
+                            </div>
+                            <div id="modal-speaking" class="mt-6">
+                                <p class="font-ui text-textMuted text-[10px] tracking-[0.3em] uppercase mb-2 font-bold">Maitre D' Prompt</p>
+                                <p id="modal-q" class="font-epic text-2xl text-textMain mb-2 italic">""</p>
+                                <p id="modal-starter" class="font-ui text-accentGold text-sm tracking-widest"></p>
+                            </div>
+                        </div>`;
+                    break;
+                case 'qRoulette':
+                    // Active questions logic to remove answered ones
+                    if(!state.activeQuestions[state.step]) state.activeQuestions[state.step] = [...d.questions];
+                    const hasQuestions = state.activeQuestions[state.step].length > 0;
+                    
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto fade-in text-center flex flex-col items-center">
+                            <p class="font-ui text-textMuted font-bold mb-4 uppercase text-xs tracking-widest"><i class="fa-solid fa-arrows-spin mr-2"></i> ${d.instruction}</p>
+                            <h2 class="font-epic text-5xl text-textMain mb-12 tracking-widest uppercase">${d.title}</h2>
+                            
+                            <div class="w-full max-w-3xl mb-12 h-48 flex items-center justify-center overflow-hidden relative bg-[#0A0505] border border-[#331A1A] shadow-inner">
+                                <h3 id="roulette-text-${state.step}" class="font-ui text-2xl md:text-3xl text-accentGold font-bold relative z-20 transition-all duration-75 text-center px-8">
+                                    ${hasQuestions ? 'Spin the wheel to chat' : 'Conversation finished!'}
+                                </h3>
+                            </div>
+                            
+                            ${hasQuestions 
+                                ? `<button id="spin-btn-${state.step}" onclick="spinRoulette(${state.step})" class="font-epic text-2xl btn-luxury px-20 py-4">SPIN</button>`
+                                : `<button onclick="nav(1)" class="font-epic text-2xl bg-accentGold text-bgBase px-20 py-4 font-bold tracking-widest uppercase rounded">CONTINUE DINNER</button>`
+                            }
+                            
+                            <div id="roulette-followup-${state.step}" class="hidden w-full mt-8">
+                                <div class="bg-[#140A0A] p-6 border border-accentGold flex justify-between items-center shadow-lg">
+                                    <p class="font-epic text-2xl text-textMain tracking-widest uppercase"><i class="fa-solid fa-microphone mr-3 text-accentGold"></i> Speak your answer to the Teacher</p>
+                                    <button onclick="finishRouletteTurn(${state.step})" class="bg-accentGold text-bgBase font-bold font-ui px-8 py-3 text-sm tracking-widest uppercase">I Answered</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    break;
+                case 'crossroads':
+                    content = `
+                        <div class="w-full max-w-5xl mx-auto fade-in text-center">
+                            <p class="font-ui text-accentRed text-[10px] font-bold mb-4 uppercase tracking-[0.4em] animate-pulse">Critical Decision</p>
+                            <h2 class="font-epic text-6xl text-textMain mb-10 tracking-widest uppercase">${d.title}</h2>
+                            <div class="p-10 mb-12 max-w-3xl mx-auto text-center ws-panel border-t border-accentRed">
+                                <p class="font-epic text-3xl text-textMain leading-relaxed italic">"${d.dilemma}"</p>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row justify-center gap-8 px-4">
+                                <button onclick="triggerPraise('DECISION LOGGED', 'BILL SETTLED'); nav(1)" class="flex-1 py-12 bg-[#0A0505] border border-[#331A1A] hover:border-accentGold hover:bg-accentGold/5 group transition-all relative">
+                                    <span class="font-epic text-3xl text-textMain group-hover:text-accentGold block mb-2 tracking-widest uppercase">${d.opt1}</span>
+                                    <span class="font-ui font-bold text-textMuted text-[10px] tracking-[0.2em] uppercase">"I would choose..."</span>
+                                </button>
+                                <button onclick="triggerPraise('DECISION LOGGED', 'BILL SETTLED'); nav(1)" class="flex-1 py-12 bg-[#0A0505] border border-[#331A1A] hover:border-accentGold hover:bg-accentGold/5 group transition-all relative">
+                                    <span class="font-epic text-3xl text-textMain group-hover:text-accentGold block mb-2 tracking-widest uppercase">${d.opt2}</span>
+                                    <span class="font-ui font-bold text-textMuted text-[10px] tracking-[0.2em] uppercase">"I would choose..."</span>
+                                </button>
+                            </div>
+                        </div>`;
+                    break;
+                case 'debate':
+                    content = `
+                        <div class="w-full max-w-4xl mx-auto text-center fade-in h-full flex flex-col justify-center items-center">
+                            <h2 class="font-ui text-[10px] tracking-[0.5em] text-accentGold mb-8 uppercase font-bold border-b border-accentGold pb-2">${d.title}</h2>
+                            <div class="ws-panel p-12 md:p-16 mb-10 relative overflow-hidden border-l-2 border-accentGold w-full">
+                                <i class="fa-solid fa-quote-left absolute top-6 left-6 text-4xl text-[#331A1A]"></i>
+                                <p class="font-epic text-4xl md:text-5xl leading-relaxed text-textMain mb-8 mt-4">"${d.q}"</p>
+                                <p class="font-ui text-accentGold text-sm font-bold tracking-widest uppercase">"${d.starter}"</p>
+                            </div>
+                            <p class="font-ui text-textMuted text-xs font-bold animate-pulse uppercase tracking-[0.3em]"><i class="fa-solid fa-microphone mr-2"></i> Discuss with Teacher</p>
+                        </div>`;
+                    break;
+                case 'homework':
+                    content = `
+                        <div class="w-full max-w-md mx-auto fade-in text-center flex flex-col items-center ws-panel p-16 border-t-4 border-accentGold">
+                            <i class="fa-solid fa-mobile-screen-button text-6xl text-accentGold mb-8 glow-gold"></i>
+                            <h2 class="font-epic text-4xl text-textMain mb-4 tracking-widest uppercase">${d.title}</h2>
+                            <p class="font-ui text-textMuted text-sm font-bold leading-relaxed mb-10 uppercase tracking-widest">${d.desc}</p>
+                            <a href="#" class="w-full btn-luxury py-5 text-sm inline-block">OPEN ${d.appName}</a>
+                        </div>`;
+                    break;
+                case 'curtain':
+                    content = `
+                        <div class="w-full max-w-3xl mx-auto fade-in text-center">
+                            <div class="inline-block mb-8">
+                                <i class="fa-solid fa-star text-9xl text-accentGold glow-gold"></i>
+                            </div>
+                            <h1 class="font-epic text-6xl md:text-8xl text-textMain mb-6 tracking-widest uppercase">${d.title}</h1>
+                            <p class="font-ui text-sm text-textMuted font-bold mb-12 uppercase leading-relaxed max-w-xl mx-auto tracking-widest">${d.desc}</p>
+                            
+                            <div class="bg-[#140A0A] p-8 inline-block min-w-[300px] mb-16 border border-[#331A1A] shadow-lg">
+                                <p class="font-ui text-[10px] text-textMuted mb-2 uppercase font-bold tracking-[0.4em]">Final Etiquette Score</p>
+                                <p class="font-epic text-7xl text-accentGold glow-gold">${state.xp}</p>
+                            </div>
+                            
+                            <br>
+                            <button onclick="location.reload()" class="font-ui text-textMuted text-xs font-bold hover:text-white transition-colors uppercase tracking-[0.3em] border-b border-transparent hover:border-white pb-1">Exit Restaurant</button>
+                        </div>`;
+                    break;
+            }
+
+            container.innerHTML = content;
+        }
+
+        // --- STREAMING_CHUNK:Mechanics Logic ---
+        function registerID() {
+            let val = document.getElementById('id-input').value.trim();
+            if(val) {
+                state.studentName = val;
+                triggerPraise('CONFIRMED!', 'TABLE IS READY');
+                setTimeout(() => nav(1), 1500);
+            }
+        }
+
+        let selectedTable = null;
+        function selectTable(btn, tableId) {
+            document.querySelectorAll('.table-card').forEach(b => {
+                b.classList.remove('border-accentGold', 'bg-accentGold/5');
+                b.querySelector('i').classList.remove('text-accentGold');
+                b.querySelector('i').classList.add('text-textMuted');
+            });
+            
+            btn.classList.add('border-accentGold', 'bg-accentGold/5');
+            btn.querySelector('i').classList.remove('text-textMuted');
+            btn.querySelector('i').classList.add('text-accentGold');
+            
+            selectedTable = tableId;
+            const confirmBtn = document.getElementById('confirm-table-btn');
+            confirmBtn.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+        }
+
+        function confirmTable() {
+            if(!selectedTable) return;
+            const confirmBtn = document.getElementById('confirm-table-btn');
+            confirmBtn.classList.add('hidden');
+            
+            const btns = document.querySelectorAll('.table-card');
+            btns.forEach(b => b.classList.add('pointer-events-none', 'opacity-50'));
+            
+            triggerPraise('SEATED!', 'MENU ARRIVING');
+            const fu = document.getElementById('follow-up-box');
+            if(fu) fu.classList.remove('hidden');
+        }
+
+        let selectedPill = null;
+        function selectVocab(el) {
+            if(selectedPill) selectedPill.classList.remove('border-accentGold', 'text-accentGold');
+            selectedPill = el;
+            el.classList.add('border-accentGold', 'text-accentGold');
+        }
+        function dropVocab(slot, correctWord) {
+            if(!selectedPill) return;
+            if(selectedPill.getAttribute('data-word') === correctWord) {
+                slot.innerHTML = `<span class="font-epic text-2xl text-accentGold tracking-widest uppercase">${correctWord}</span>`;
+                slot.classList.replace('border-dashed', 'border-solid');
+                slot.classList.replace('border-[#555]', 'border-accentGold');
+                slot.classList.replace('bg-[#0A0505]', 'bg-accentGold/10');
+                selectedPill.style.display = 'none';
+                selectedPill = null;
+                const total = document.querySelectorAll('.vocab-drop').length;
+                const done = document.querySelectorAll('.vocab-drop.border-accentGold').length;
+                if(total === done) triggerPraise('MAPPED!', 'MENU UNDERSTOOD');
+            } else {
+                takeDamage();
+            }
+        }
+
+        function filterPoliteness(el, politeText) {
+            el.innerText = `"${politeText}"`;
+            el.classList.add('polite');
+            
+            document.getElementById('verify-filter-btn').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+            const fu = document.getElementById('decoder-followup');
+            if(fu) fu.classList.remove('hidden');
+            
+            triggerPraise('POLITE!', 'MUCH BETTER');
+        }
+
+        function moveBlock(btn) {
+            const ans = document.getElementById('decoder-ans');
+            const bank = document.getElementById('decoder-bank');
+            const placeholder = document.getElementById('decoder-placeholder');
+            
+            if(btn.parentElement === bank) {
+                ans.appendChild(btn);
+                btn.classList.replace('bg-[#0A0505]', 'bg-[#140A0A]');
+                if(placeholder) placeholder.style.display = 'none';
+            } else {
+                bank.appendChild(btn);
+                btn.classList.replace('bg-[#140A0A]', 'bg-[#0A0505]');
+                if(ans.querySelectorAll('button').length === 0 && placeholder) placeholder.style.display = 'block';
+            }
+        }
+        
+        function checkDecoder(correctStr) {
+            const current = Array.from(document.getElementById('decoder-ans').querySelectorAll('button')).map(b => b.innerText).join(' ');
+            if(current.toUpperCase() === correctStr.toUpperCase()) {
+                document.getElementById('decoder-ans').classList.replace('border-dashed', 'border-solid');
+                document.getElementById('decoder-ans').classList.replace('border-[#555]', 'border-accentGreen');
+                document.getElementById('verify-btn').classList.add('hidden');
+                const fu = document.getElementById('decoder-followup');
+                if(fu) fu.classList.remove('hidden');
+                triggerPraise('ORDERED!', 'WAITER UNDERSTOOD');
+            } else {
+                takeDamage();
+            }
+        }
+
+        function openVocabModal(element, title, def, q, starter) {
+            const links = document.querySelectorAll('.vocab-link');
+            links.forEach(l => l.classList.remove('active'));
+            element.classList.add('active');
+            
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-def').innerText = def;
+            document.getElementById('modal-q').innerText = `"${q}"`;
+            document.getElementById('modal-starter').innerText = `"${starter}"`;
+            
+            document.getElementById('vocab-modal').classList.remove('hidden');
+            triggerPraise('MENU READ', 'VOCAB UNLOCKED');
+            
+            setTimeout(() => {
+                document.getElementById('vocab-modal').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        let rouletteSpinning = false;
+        function spinRoulette(stepIndex) {
+            if(rouletteSpinning) return;
+            const qList = state.activeQuestions[stepIndex];
+            if(qList.length === 0) return; 
+            
+            rouletteSpinning = true;
+            const textEl = document.getElementById(`roulette-text-${stepIndex}`); 
+            const btn = document.getElementById(`spin-btn-${stepIndex}`); 
+            const fu = document.getElementById(`roulette-followup-${stepIndex}`);
+            
+            btn.classList.add('opacity-50', 'pointer-events-none'); 
+            fu.classList.add('hidden'); 
+            textEl.classList.replace('text-accentGold', 'text-textMain');
+            
+            let spins = 0; const maxSpins = 20;
+            const originalList = lesson[stepIndex].questions; 
+            
+            const interval = setInterval(() => {
+                textEl.innerText = originalList[Math.floor(Math.random() * originalList.length)]; 
+                spins++;
+                
+                if(spins >= maxSpins) {
+                    clearInterval(interval);
+                    const randomIndex = Math.floor(Math.random() * qList.length);
+                    const selectedQ = qList[randomIndex];
+                    
+                    qList.splice(randomIndex, 1); // Consume the question
+                    
+                    textEl.innerText = `"${selectedQ}"`; 
+                    textEl.classList.replace('text-textMain', 'text-accentGold');
+                    
+                    fu.classList.remove('hidden'); 
+                    rouletteSpinning = false;
+                }
+            }, 80);
+        }
+        
+        function finishRouletteTurn(stepIndex) {
+            const fu = document.getElementById(`roulette-followup-${stepIndex}`);
+            fu.classList.add('hidden');
+            triggerPraise('WELL SPOKEN!', 'GOOD ENGLISH');
+            setTimeout(() => render(), 1000); 
+        }
+
+        // --- STREAMING_CHUNK:Confetti Engine ---
+        function shootConfetti() {
+            const cCanvas = document.createElement('canvas'); cCanvas.style.position = 'fixed'; cCanvas.style.inset = 0; cCanvas.style.pointerEvents = 'none'; cCanvas.style.zIndex = 9999; document.body.appendChild(cCanvas);
+            const cCtx = cCanvas.getContext('2d'); cCanvas.width = window.innerWidth; cCanvas.height = window.innerHeight;
+            const pieces = []; const colors = ['#D4AF37', '#8B0000', '#FFFFFF'];
+            for(let i=0; i<60; i++) pieces.push({ x: cCanvas.width/2, y: cCanvas.height/2+100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20-5, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotSpeed: (Math.random()-0.5)*10 });
+            function animateC() {
+                cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height); let active = false;
+                pieces.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.rot += p.rotSpeed; if(p.y < cCanvas.height) active = true; cCtx.save(); cCtx.translate(p.x, p.y); cCtx.rotate(p.rot*Math.PI/180); cCtx.fillStyle = p.color; cCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size); cCtx.restore(); });
+                if(active) requestAnimationFrame(animateC); else document.body.removeChild(cCanvas);
+            }
+            animateC();
+        }
+
+        window.onload = () => { updateHUD(); };
+    </script>
+</body>
+</html>
